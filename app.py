@@ -14,7 +14,7 @@ import streamlit as st
 from dashboard_data import DashboardDataError, MODEL_UK, REGION_UK, REGIME_UK, load_outputs
 from dashboard_auto import AutoForecastError, load_latest_week
 from history_heatmap import MONTH_UK, month_summary, year_heatmap, month_details
-from history_daily_chart import daily_columns_spec
+from history_daily_chart import region_chart_payload
 from dashboard_analysis import (
     current_snapshot_warning, regional_category_counts, selected_day_forecast,
     subset_all_regions, verify_frozen_windows, verify_model_choices,
@@ -194,8 +194,16 @@ def history_page():
     details = month_details(full_history, detail_region, int(chosen_year), int(detail_month))
     # Ordinal day labels 01..31 eliminate timestamp zoom labels (06 AM, 12 PM).
     # Vega-Lite bar widths are fixed at 22px, with a 32px step for readability.
-    daily_spec = daily_columns_spec(details, int(chosen_year), int(detail_month))
-    st.vega_lite_chart(spec=daily_spec, use_container_width=False)
+    chart_rows, daily_spec, chart_key = region_chart_payload(
+        details, int(chosen_year), int(detail_month), detail_region
+    )
+    st.caption(
+        f"Показано: **{REGION_UK.get(detail_region, detail_region)}** · "
+        f"{MONTH_UK[int(detail_month) - 1]} {int(chosen_year)}"
+    )
+    st.vega_lite_chart(
+        data=chart_rows, spec=daily_spec, key=chart_key, use_container_width=False
+    )
     if len(details) < len(daily_spec['encoding']['x']['scale']['domain']):
         st.caption('У вибраному місяці є дні без добового рядка. На графіку вони залишені '
                    'порожніми, а не замінені нульовою тривалістю.')
