@@ -6,9 +6,6 @@ This is NOT a live alert, safety, or attack forecast system.
 from __future__ import annotations
 
 from datetime import date
-import calendar
-import html
-import math
 from pathlib import Path
 
 import pandas as pd
@@ -16,7 +13,8 @@ import streamlit as st
 
 from dashboard_data import DashboardDataError, MODEL_UK, REGION_UK, REGIME_UK, load_outputs
 from dashboard_auto import AutoForecastError, load_latest_week
-from history_heatmap import MONTH_UK, month_summary, year_heatmap, month_details
+from history_heatmap import MONTH_UK, month_summary, year_heatmap
+from history_multicharts import prepare_month_comparison, comparison_table, daily_wide_table, render_month_png
 from dashboard_analysis import (
     current_snapshot_warning, regional_category_counts, selected_day_forecast,
     subset_all_regions, verify_frozen_windows, verify_model_choices,
@@ -143,65 +141,10 @@ def cached_months(history: pd.DataFrame, regions_tuple: tuple[str, ...]) -> pd.D
 
 
 
-def _static_monthly_bars(details: pd.DataFrame, year: int, month: int, region: str) -> str:
-    """Render daily values as plain inline SVG (no Vega state, no JS or widget cache).
-
-    Changes of region necessarily change the HTML string. Missing days have no bar,
-    while observed zero-hour days retain a one-pixel marker. The Y axis is hours.
-    """
-    if not region or details.empty:
-        raise ValueError("Для графіка потрібні область і хоча б один день.")
-    dates = pd.to_datetime(details["date"], errors="raise")
-    nums = pd.to_numeric(details["recorded_hours"], errors="raise")
-    if (dates.dt.year != year).any() or (dates.dt.month != month).any():
-        raise ValueError("Дати виходять за межі обраного місяця.")
-    if not nums.map(math.isfinite).all() or (nums < 0).any() or (nums > 24.00001).any():
-        raise ValueError("Некоректні години для добового графіка.")
-    if dates.dt.day.duplicated().any():
-        raise ValueError("Повторний день у добовому графіку.")
-
-    days = calendar.monthrange(year, month)[1]
-    values = {int(day.day): float(h) for day, h in zip(dates, nums)}
-    max_hours = max(values.values(), default=0.0)
-    ymax = max(2, 2 * math.ceil(max_hours / 2))
-    step, bar_width = 34, 25
-    left, top, plot_height, bottom = 58, 25, 255, 300
-    width, height = left + step * days + 24, 364
-    region_label = html.escape(region, quote=True)
-    parts = [
-        f'<div style="width:100%;overflow-x:auto;overflow-y:hidden;" '
-        f'data-region="{region_label}" data-year="{year}" data-month="{month}">',
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
-        f'viewBox="0 0 {width} {height}" role="img" '
-        f'aria-label="Зафіксовані години тривог за кожен день: {region_label}, {month:02d}.{year}">',
-    ]
-    for k in range(5):
-        v = ymax * k / 4
-        y = bottom - plot_height * k / 4
-        parts.append(f'<line x1="{left}" y1="{y:.2f}" x2="{width-12}" y2="{y:.2f}" '
-                     'stroke="#E2E8F0" stroke-width="1"/>')
-        parts.append(f'<text x="{left-12}" y="{y+4:.2f}" text-anchor="end" '
-                     'font-family="sans-serif" font-size="12" fill="#64748B">'
-                     f'{v:g}</text>')
-    for d in range(1, days + 1):
-        center = left + step * (d-0.5)
-        parts.append(f'<text x="{center:.2f}" y="{bottom+19}" text-anchor="middle" '
-                     f'font-family="sans-serif" font-size="11" fill="#64748B">{d:02d}</text>')
-        if d in values:
-            hours = values[d]
-            h = plot_height * hours / ymax
-            show_h = max(1, h)
-            y = bottom - show_h
-            tip = html.escape(f"{region} · {d:02d}.{month:02d}.{year}: {hours:.2f} год", quote=True)
-            parts.append(f'<rect x="{center-bar_width/2:.2f}" y="{y:.2f}" '
-                         f'width="{bar_width}" height="{show_h:.2f}" rx="3" fill="#3478BD">'
-                         f'<title>{tip}</title></rect>')
-    parts.append(f'<text x="{width/2:.2f}" y="{height-13}" text-anchor="middle" '
-                 'font-family="sans-serif" font-size="13" fill="#64748B">День місяця</text>')
-    parts.append('<text x="14" y="20" font-family="sans-serif" font-size="12" '
-                 'fill="#64748B">год</text>')
-    parts.extend(['</svg>', '</div>'])
-    return ''.join(parts)
+@st.cache_data(show_spinner=False, max_entries=16)
+def cached_month_image(part: pd.DataFrame, region_names: tuple[str, ...], year: int, month: int) -> bytes:
+    """Render one PNG per chosen year/month; cached when the page reruns."""
+    return render_month_png(part, list(region_names), year, month)
 
 
 def history_page():
@@ -238,46 +181,31 @@ def history_page():
                    'Початок історії у 2022 році та жовтень 2026 можуть бути неповними.')
 
     st.divider()
-    st.subheader('Деталізація · одна область і один місяць')
-    st.caption('Кожен стовпчик — записана тривалість тривог за цілу календарну добу. '
-               'Внизу показано всі числа місяця, без годинних позначок 06 AM / 12 PM.')
+    st.subheader('Деталізація · сім областей за один місяць')
+    st.caption('Один місяць — сім окремих добових стовпчикових графіків. '
+               'Вісь X показує кожен день 01–31, вісь Y — записану тривалість у годинах. '
+               'У всіх областей однакова шкала Y, щоб порівняння було чесним. '
+               'Відсутні добові записи не перетворюються на нулі.')
     active_months = sorted(monthly.loc[monthly['year'] == chosen_year, 'month'].unique().tolist())
-    c1, c2 = st.columns(2)
-    with c1:
-        detail_month = st.selectbox('Місяць', active_months,
-                                    format_func=lambda m: MONTH_UK[m - 1],
-                                    key='history_detail_month')
-    with c2:
-        available_regions = monthly.loc[
-            (monthly['year'] == chosen_year) & (monthly['month'] == detail_month), 'region'
-        ].tolist()
-        ordered_available = [r for r in regions if r in available_regions]
-        detail_region = st.selectbox('Область для деталізації', ordered_available,
-                                     format_func=lambda r: REGION_UK.get(r, r),
-                                     key='history_detail_region')
-    details = month_details(full_history, detail_region, int(chosen_year), int(detail_month))
-    chosen_name = REGION_UK.get(detail_region, detail_region)
-    st.caption(f"Показано: **{chosen_name}** · {MONTH_UK[int(detail_month)-1]} {int(chosen_year)}. "
-               f"Перший день: {float(details.iloc[0]['recorded_hours']):.2f} год. "
-               "Графік статичний, без зависань Vega-Lite; наведи курсор для точної тривалості.")
-    st.html(_static_monthly_bars(details, int(chosen_year), int(detail_month), chosen_name))
-    if len(details) < calendar.monthrange(int(chosen_year), int(detail_month))[1]:
-        st.caption('У вибраному місяці є дні без добового рядка. На графіку вони залишені '
-                   'порожніми, а не замінені нульовою тривалістю.')
-    c1, c2, c3 = st.columns(3)
-    c1.metric('Днів із добовими даними', len(details))
-    c2.metric('Середня тривалість за день', f"{details['recorded_hours'].mean():.2f} год")
-    c3.metric('Днів із записом у джерелі', int(details['has_source_interval'].sum()))
-    with st.expander('Переглянути добові значення та умовні завершення'):
-        view = details.rename(columns={
-            'date': 'Дата', 'recorded_hours': 'Записані години',
-            'has_source_interval': 'Є запис у джерелі',
-            'naive_added_hours': 'Умовно завершені години',
-        })
-        st.dataframe(view, hide_index=True, use_container_width=True)
-        st.caption('Нуль годин означає відсутність записаного інтервалу, '
-                   'а не доведену відсутність реальної тривоги. `naive=True` '
-                   'враховано, але внесок збережено окремо.')
+    detail_month = st.selectbox('Місяць для порівняння всіх 7 областей', active_months,
+                                format_func=lambda m: MONTH_UK[m - 1], key='history_detail_month')
+    one_month = prepare_month_comparison(full_history, regions, int(chosen_year), int(detail_month))
+    st.caption(f"Показано всі 7 областей · {MONTH_UK[int(detail_month) - 1]} {int(chosen_year)}")
+    try:
+        png = cached_month_image(one_month, tuple(regions), int(chosen_year), int(detail_month))
+        st.image(png, use_container_width=True)
+    except Exception as exc:
+        st.warning('Matplotlib не змогла сформувати зображення в цьому середовищі. '
+                   'Нижче доступна числова таблиця без додаткових графічних бібліотек.')
+        st.caption(f'Технічна причина: {type(exc).__name__}: {str(exc)[:260]}')
+        st.dataframe(daily_wide_table(one_month, regions, int(chosen_year), int(detail_month)),
+                     use_container_width=True)
+    st.dataframe(comparison_table(one_month, regions), hide_index=True, use_container_width=True)
+    with st.expander('Переглянути точні години для кожного дня й області'):
+        table = daily_wide_table(one_month, regions, int(chosen_year), int(detail_month))
+        st.dataframe(table.style.format('{:.2f}', na_rep='—'), use_container_width=True)
+        st.caption('Порожня клітинка означає відсутній добовий рядок; 0.00 означає '
+                   'нуль записаних годин, що не доводить фактичної відсутності тривог.')
 
 
 def category_page():
