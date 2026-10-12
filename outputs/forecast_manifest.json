@@ -1,0 +1,39 @@
+{
+  "created_at_kyiv": "2026-10-12T22:10:31.683489+03:00",
+  "date_of_last_complete_observation": "2026-10-09",
+  "forecast_target_dates": [
+    "2026-10-12",
+    "2026-10-18"
+  ],
+  "forecast_horizons": [
+    3,
+    9
+  ],
+  "model_selection_policy": "choose per region on pre-holdout validation gap_3_9; ties prefer baseline",
+  "selection_threshold_reference_180days_through": "2026-08-14",
+  "selection_target_range": [
+    "2026-08-15",
+    "2026-09-11"
+  ],
+  "final_thresholds_through": "2026-09-11",
+  "holdout_target_range": [
+    "2026-09-12",
+    "2026-10-09"
+  ],
+  "holdout_A": "4 weekly issue dates, horizons 1-7, 28 unique dates per region",
+  "holdout_B": "4 weekly issue dates, horizons 3-9, 26 unique dates per region",
+  "model_refit": "logistic regression refitted at each weekly issue date, baseline recomputed from latest 28 days",
+  "metric": "unscaled multiclass Brier = sum of three squared probability errors, lower is better",
+  "daily_sha256": "b9b316c35a044177b44f4af18d15c825a319a347655beb5fc3e4d142fa633504",
+  "thresholds_sha256": "7d33ebe27bdb86ca89e0cdd6cc794ceba76784bb348a7036418af716b4d6325f",
+  "limitations": [
+    "The Sep12-Oct9 holdout was previously inspected in Stage 3; this is a corrected evaluation, not a fresh untouched holdout.",
+    "A and B are overlapping experiments; don't pool them as independent targets.",
+    "Selection validation uses earlier fixed thresholds fitted through Aug14; final test uses frozen Sep11 thresholds.",
+    "CSV publication/retrospective edit times are not recorded: complete historical point-in-time availability is not proven.",
+    "A dense calendar with zero recorded hours is not proof that zero alerts occurred.",
+    "Naive-ended intervals are assumed 30 minutes and official yellow/red alarm levels aren't available.",
+    "These are recorded-activity categories, not safety or actionable attack predictions.",
+    "Oct12-18 is a forward forecast: its actual error is not yet known."
+  ]
+}

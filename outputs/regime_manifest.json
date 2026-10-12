@@ -1,0 +1,32 @@
+{
+  "created_at_kyiv": "2026-10-12T22:10:07.627645+03:00",
+  "daily_csv_sha256": "b9b316c35a044177b44f4af18d15c825a319a347655beb5fc3e4d142fa633504",
+  "training_period_inclusive": [
+    "2026-03-16",
+    "2026-09-11"
+  ],
+  "reserved_holdout_not_used_for_thresholds": [
+    "2026-09-12",
+    "2026-10-09"
+  ],
+  "candidate_regions": [
+    "Chernihivska oblast",
+    "Kharkivska oblast",
+    "Sumska oblast",
+    "Zaporizka oblast",
+    "Dnipropetrovska oblast",
+    "Poltavska oblast",
+    "Mykolaivska oblast"
+  ],
+  "accepted_regions": [
+    "Chernihivska oblast",
+    "Kharkivska oblast",
+    "Sumska oblast",
+    "Zaporizka oblast",
+    "Dnipropetrovska oblast",
+    "Poltavska oblast",
+    "Mykolaivska oblast"
+  ],
+  "definition": "low: recorded_hours <= training q33; medium: training q33 < recorded_hours <= training q75; high: recorded_hours > training q75",
+  "warning": "These are relative recorded-activity labels, not official alarm colours or a guarantee of safety. No-alert rows may also reflect missing source data."
+}

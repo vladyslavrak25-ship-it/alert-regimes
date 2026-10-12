@@ -1,0 +1,8 @@
+﻿region,train_start,train_end,train_days,days_with_source_interval,mean_hours,naive_hours_share,low_days,medium_days,high_days,suitable,reason
+Chernihivska oblast,2026-03-16,2026-09-11,180,179,5.6014,0.0159,60,75,45,True,Критерії виконані
+Kharkivska oblast,2026-03-16,2026-09-11,180,180,5.4062,0.001,60,75,45,True,Критерії виконані
+Sumska oblast,2026-03-16,2026-09-11,180,180,4.9983,0.0083,60,75,45,True,Критерії виконані
+Zaporizka oblast,2026-03-16,2026-09-11,180,180,4.5128,0.0375,60,75,45,True,Критерії виконані
+Dnipropetrovska oblast,2026-03-16,2026-09-11,180,180,4.4808,0.0031,60,75,45,True,Критерії виконані
+Poltavska oblast,2026-03-16,2026-09-11,180,178,4.008,0.0159,60,75,45,True,Критерії виконані
+Mykolaivska oblast,2026-03-16,2026-09-11,180,178,3.6278,0.0567,60,75,45,True,Критерії виконані

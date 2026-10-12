@@ -1,0 +1,8 @@
+﻿region,selected_model,selection_end,selection_gap_brier_logistic,selection_gap_brier_baseline,selection_forecasts
+Chernihivska oblast,baseline,2026-09-11,0.6570646347239292,0.6362763147362523,26
+Kharkivska oblast,baseline,2026-09-11,0.6989188966938221,0.6361962699111501,26
+Sumska oblast,baseline,2026-09-11,0.7345220951768792,0.7227247258464741,26
+Zaporizka oblast,baseline,2026-09-11,0.4361463247651832,0.4227167213639638,26
+Dnipropetrovska oblast,baseline,2026-09-11,0.7775526227552778,0.7248859361242295,26
+Poltavska oblast,logistic,2026-09-11,0.5676467718899387,0.6084207156007364,26
+Mykolaivska oblast,logistic,2026-09-11,0.5256705663987186,0.5616745377411351,26

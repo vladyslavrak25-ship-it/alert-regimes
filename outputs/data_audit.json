@@ -1,0 +1,20 @@
+{
+  "input_rows": 115793,
+  "empty_region_rows": 0,
+  "bad_timestamp_rows": 0,
+  "bad_naive_rows": 0,
+  "nonpositive_interval_rows": 6,
+  "invalid_rows_removed": 6,
+  "exact_duplicate_rows_removed": 0,
+  "valid_rows": 115787,
+  "naive_true_rows": 5791,
+  "data_file": "/mnt/data/alert-regimes-final/data/volunteer_data_en.csv",
+  "input_sha256": "e441ecaa9813c9088e41aa6f137f9917679c9721701c817a97aae3bed470e1d5",
+  "report_created_at_kyiv": "2026-10-12T22:10:06.863761+03:00",
+  "latest_start_kyiv": "2026-10-10T07:47:44+03:00",
+  "last_included_day": "2026-10-09",
+  "number_of_regions": 25,
+  "number_of_daily_rows": 42158,
+  "days_without_source_intervals": 12123,
+  "note": "0 recorded hours means no matching interval in this CSV, not proof that no alert occurred. The dataset can be revised retrospectively."
+}
