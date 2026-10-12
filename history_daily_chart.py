@@ -97,3 +97,18 @@ def daily_columns_spec(details: pd.DataFrame, year: int, month: int) -> dict:
             "axis": {"gridColor": "#E5EAF0"},
         },
     }
+
+def region_chart_payload(details: pd.DataFrame, year: int, month: int, region: str) -> tuple[pd.DataFrame, dict, str]:
+    """Prepare independent data and chart identity for a region/month selection.
+
+    Passing plot data independently from Vega-Lite spec avoids reusing a stale
+    embedded dataset across Streamlit reruns. A selection-specific key forces
+    a fresh frontend chart when the region changes but day labels stay equal.
+    """
+    if not isinstance(region, str) or not region.strip():
+        raise ValueError("Для добового графіка потрібно вибрати область.")
+    year, month = int(year), int(month)
+    spec = daily_columns_spec(details, year, month)
+    rows = pd.DataFrame(spec.pop("data")["values"])
+    chart_key = f"detail_days_{year}_{month:02d}_{region.strip().replace(' ', '_')}"
+    return rows, spec, chart_key
