@@ -1,0 +1,39 @@
+name: Weekly Alert Regimes forecast
+on:
+  schedule:
+    # Sunday 18:00 UTC = Sunday 20:00/21:00 Europe/Kyiv.
+    # Before next Monday starts, so the forecast cannot be backdated.
+    - cron: '0 18 * * 0'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: alert-regimes-weekly-forecast
+  cancel-in-progress: false
+jobs:
+  weekly-forecast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements_auto.txt
+      - name: Install dependencies
+        run: python -m pip install -r requirements_auto.txt
+      - name: Verify safe cutoff and scheduled behaviour
+        run: python -m pytest -q tests/test_safe_week.py tests/test_weekly_autorun.py
+      - name: Fetch public source, validate, and issue seven-day forecast
+        run: python weekly_autorun.py
+      - name: Commit only generated forecast and manifest
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f analysis/auto_forecasts outputs/auto_week_latest.csv outputs/auto_week_latest_manifest.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Publish weekly forecast (source-checked, no future data)"
+          git push
