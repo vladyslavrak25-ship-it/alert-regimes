@@ -3,3 +3,4 @@ pandas>=2.2,<3
 streamlit>=1.40,<2
 tzdata>=2025.2
 pytest>=8,<10
+matplotlib>=3.8,<4
