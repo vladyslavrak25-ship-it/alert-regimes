@@ -78,4 +78,4 @@ python weekly_autorun.py --check-source
 
 Модель не обов'язково стає кращою, якщо прогнозовані відсотки змінюються щодня. Baseline може бути точнішою від складнішої Logistic Regression на даних конкретної області. Потрібно окремо перевіряти інші ковзні вікна й періоди, оцінювати якість на *нових* тижнях та дослідити часову доступність джерела. Застосунок насамперед демонструє прозорий статистичний протокол і межі достовірності.
 
-Читайте також [AI Conversation Log](docs/AI_CONVERSATION_LOG.md) — вибрані фрагменти діалогу та рішення користувача, [AI-log](docs/AI_LOG.md) — стислий журнал роботи, і [reflection](docs/REFLECTION.md).
+Читайте також [повний текстовий експорт розмови](docs/AI_CONVERSATION_FULL_TEXT.txt) та [AI Conversation Log](docs/AI_CONVERSATION_LOG.md) — вибрані фрагменти діалогу та рішення користувача, [AI-log](docs/AI_LOG.md) — стислий журнал роботи, і [reflection](docs/REFLECTION.md).
