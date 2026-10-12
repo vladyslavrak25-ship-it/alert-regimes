@@ -29,7 +29,7 @@ def test_real_png_is_renderable():
     month = prepare_month_comparison(data["daily"], regions, 2026, 1)
     assert len(month) == 217
     img = render_month_png(month, regions, 2026, 1)
-    assert img.startswith(b"\\x89PNG\\r\\n\\x1a\\n")
+    assert img.startswith(bytes([137, 80, 78, 71, 13, 10, 26, 10]))
     with image_module.open(BytesIO(img)) as im:
         im.load()
         assert im.width > 900 and im.height > 1200
