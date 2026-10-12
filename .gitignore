@@ -1,0 +1,12 @@
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.idea/
+*.py[cod]
+.DS_Store
+# Candidate CSV may contain observations within target period; do not accidentally publish it.
+data/*candidate*.csv
+# Auto-forecast archives are published deliberately by the workflow.
+analysis/
+# Do NOT ignore outputs/: the dashboard needs its pinned reproducible artifacts.
