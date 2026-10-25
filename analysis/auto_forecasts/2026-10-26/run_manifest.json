@@ -1,0 +1,27 @@
+{
+  "forecast_first_day": "2026-10-26",
+  "forecast_last_day": "2026-11-01",
+  "last_training_day": "2026-10-24",
+  "forbidden_from_kyiv": "2026-10-25T00:00 Europe/Kyiv",
+  "horizons": [
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "created_at_kyiv": "2026-10-25T22:31:25.619699+02:00",
+  "source_url": "https://raw.githubusercontent.com/Vadimkin/ukrainian-air-raid-sirens-dataset/main/datasets/volunteer_data_en.csv",
+  "source_sha256": "781002b6259a9aca2d740f8968f16d565454d0c785a4d025277f1ef017c84f4c",
+  "source_latest_start_kyiv": "2026-10-25T05:36:15+02:00",
+  "source_rows_valid": 118726,
+  "invalid_rows_removed": 6,
+  "accepted_past_sha256": "bdffcd8b450d3cb94ab502404784d1352faf2eb9adc575a6d7effdd2a3711824",
+  "thresholds_sha256": "7d33ebe27bdb86ca89e0cdd6cc794ceba76784bb348a7036418af716b4d6325f",
+  "model_selection_sha256": "91878ca0da304573c24f18c205b792bba214c1187b501b1c108a3b998a58d0e4",
+  "selection_policy": "Frozen Sep-11-2026 validation, 5 baseline and 2 logistic, no re-selection",
+  "availability_caveat": "Snapshot captured at recorded time; per-event publication timestamps unavailable. Latest-start-minus-one is a conservative proxy, NOT proof of full daily capture.",
+  "disclaimer": "Statistical prediction of relative recorded alert-duration categories; not a safety warning."
+}
